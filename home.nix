@@ -12,6 +12,8 @@
     zoxide starship tmux fira-code
     go nixd nil
     openjdk
+    docker
+    docker-compose
   ];
 
   programs.zsh = {
