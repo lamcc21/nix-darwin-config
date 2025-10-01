@@ -11,7 +11,12 @@
     fd ripgrep htop eza jq
     zoxide starship tmux fira-code
     go nixd nil
+    terraform
     openjdk
+    (python3.withPackages (ps: with ps; [
+      pip
+      requests
+    ]))
     docker
     docker-compose
   ];
