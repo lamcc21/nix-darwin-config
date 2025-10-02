@@ -13,6 +13,7 @@
     go nixd nil
     terraform
     openjdk
+    dotnet-sdk
     (python3.withPackages (ps: with ps; [
       pip
       requests
