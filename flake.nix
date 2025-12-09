@@ -1,14 +1,9 @@
 {
-  description = "Nix-Darwin configuration for Lachlan's MacBook Air";
+  description = "Home Manager configuration for WSL Linux";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-24.11-darwin";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-
-    nix-darwin = {
-      url = "github:nix-darwin/nix-darwin/nix-darwin-24.11";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
 
     home-manager = {
       url = "github:nix-community/home-manager/release-24.11";
@@ -18,11 +13,10 @@
     rust-overlay.url = "github:oxalica/rust-overlay";
   };
 
-  outputs = { nixpkgs, nixpkgs-unstable, nix-darwin, home-manager, rust-overlay, ... }:
+  outputs = { nixpkgs, nixpkgs-unstable, home-manager, rust-overlay, ... }:
     let
-      system = "aarch64-darwin";
+      system = "x86_64-linux";
       username = "lamcc21";
-      hostname = "Lachlans-MacBook-Air";
 
       pkgs = import nixpkgs {
         inherit system;
@@ -35,33 +29,16 @@
         config.allowUnfree = true;
       };
     in {
-      darwinConfigurations."${hostname}" = nix-darwin.lib.darwinSystem {
-        inherit system pkgs;
+      homeConfigurations.${username} = home-manager.lib.homeManagerConfiguration {
+        inherit pkgs;
+
+        extraSpecialArgs = { inherit pkgs-unstable; };
 
         modules = [
+          ./home.nix
           {
-            nixpkgs.hostPlatform = system;
-            nixpkgs.config.allowUnfree = true;
-
-            nix.settings.experimental-features = [ "nix-command" "flakes" ];
-            services.nix-daemon.enable = true;
-
-            system.stateVersion = 4;
-
-            users.users.${username} = {
-              name = "${username}";
-              home = "/Users/${username}";
-            };
-
-            programs.zsh.enable = true;
-          }
-
-          home-manager.darwinModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.extraSpecialArgs = { inherit pkgs-unstable; };
-            home-manager.users.${username} = import ./home.nix;
+            home.username = username;
+            home.homeDirectory = "/home/${username}";
           }
         ];
       };
