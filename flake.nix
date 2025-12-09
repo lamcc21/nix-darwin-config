@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-24.11-darwin";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/nix-darwin-24.11";
@@ -17,7 +18,7 @@
     rust-overlay.url = "github:oxalica/rust-overlay";
   };
 
-  outputs = { nixpkgs, nix-darwin, home-manager, rust-overlay, ... }:
+  outputs = { nixpkgs, nixpkgs-unstable, nix-darwin, home-manager, rust-overlay, ... }:
     let
       system = "aarch64-darwin";
       username = "lamcc21";
@@ -27,6 +28,11 @@
         inherit system;
         config.allowUnfree = true;
         overlays = [ rust-overlay.overlays.default ];
+      };
+
+      pkgs-unstable = import nixpkgs-unstable {
+        inherit system;
+        config.allowUnfree = true;
       };
     in {
       darwinConfigurations."${hostname}" = nix-darwin.lib.darwinSystem {
@@ -54,6 +60,7 @@
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
+            home-manager.extraSpecialArgs = { inherit pkgs-unstable; };
             home-manager.users.${username} = import ./home.nix;
           }
         ];
